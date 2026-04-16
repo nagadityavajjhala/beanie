@@ -1,0 +1,470 @@
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&display=swap');
+  *{box-sizing:border-box;margin:0;padding:0;}
+  .universe{
+    width:100%;min-height:100vh;
+    background:#0d0008;
+    display:flex;flex-direction:column;align-items:center;
+    padding:50px 20px 70px;
+    position:relative;overflow:hidden;
+  }
+  canvas#space{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;}
+  .content{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;width:100%;}
+  .main-title{
+    font-family:'Cinzel Decorative',serif;
+    font-size:clamp(16px,4vw,26px);
+    color:#e8b800;
+    letter-spacing:5px;
+    text-shadow:0 0 24px rgba(232,184,0,0.65),0 0 8px rgba(232,184,0,0.4);
+    margin-bottom:44px;text-align:center;
+  }
+  .heart-scene{
+    position:relative;
+    width:340px;height:340px;
+    margin-bottom:30px;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .heart-glow{
+    position:absolute;width:210px;height:210px;border-radius:50%;
+    background:radial-gradient(circle,rgba(200,0,40,0.45) 0%,rgba(180,0,30,0.15) 55%,transparent 75%);
+    animation:pulse 2.5s ease-in-out infinite;
+    top:50%;left:50%;transform:translate(-50%,-50%);
+  }
+  @keyframes pulse{0%,100%{transform:translate(-50%,-50%) scale(1);opacity:0.8;}50%{transform:translate(-50%,-50%) scale(1.2);opacity:1;}}
+  .heart-wrap{position:relative;z-index:3;animation:heartbeat 2.5s ease-in-out infinite;}
+  @keyframes heartbeat{0%,100%{transform:scale(1);}14%{transform:scale(1.09);}28%{transform:scale(1);}42%{transform:scale(1.05);}56%{transform:scale(1);}}
+  .heart-svg{display:block;filter:drop-shadow(0 0 18px rgba(210,0,45,0.95)) drop-shadow(0 0 44px rgba(180,0,30,0.55));}
+  #benaCanvas{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:10;}
+  .angel-text{font-family:'Cormorant Garamond',Georgia,serif;font-style:italic;font-size:clamp(13px,3vw,17px);color:#e8b800;text-align:center;letter-spacing:1px;line-height:1.8;margin-bottom:8px;text-shadow:0 0 14px rgba(232,184,0,0.45);}
+  .birthday-text{font-family:'Cormorant Garamond',Georgia,serif;font-size:clamp(11px,2.5vw,14px);color:#c03050;text-align:center;letter-spacing:3px;text-transform:uppercase;margin-bottom:48px;text-shadow:0 0 12px rgba(180,20,50,0.55);}
+  .divider-wrap{display:flex;align-items:center;gap:14px;margin-bottom:28px;width:80%;max-width:500px;}
+  .divider-line{flex:1;height:1px;background:linear-gradient(to right,transparent,#80102a,#e8b800,#80102a,transparent);}
+  .divider-diamond{width:7px;height:7px;background:#e8b800;transform:rotate(45deg);box-shadow:0 0 8px rgba(232,184,0,0.8);}
+  .poem-wrap{max-width:520px;text-align:center;padding:0 20px;}
+  .poem-title{font-family:'Cinzel Decorative',serif;font-size:clamp(11px,2.5vw,15px);color:#e8b800;letter-spacing:4px;margin-bottom:20px;text-shadow:0 0 12px rgba(232,184,0,0.45);}
+  .poem-lines{font-family:'Cormorant Garamond',Georgia,serif;font-size:clamp(13px,2.8vw,17px);font-style:italic;color:#c03050;line-height:2.1;text-shadow:0 0 10px rgba(160,10,40,0.4);}
+  .poem-lines .gold{color:#e8b800;}
+  .byline{font-family:'Cormorant Garamond',Georgia,serif;font-size:clamp(11px,2.2vw,13px);color:#901030;letter-spacing:4px;margin-top:38px;text-transform:uppercase;text-shadow:0 0 10px rgba(160,10,40,0.35);}
+  .byline span{color:#e8b800;}
+  .ornament{display:flex;gap:10px;align-items:center;margin-top:22px;}
+  .orb{width:5px;height:5px;border-radius:50%;background:#e8b800;opacity:0.4;}
+  .orb.big{width:8px;height:8px;opacity:0.75;box-shadow:0 0 6px rgba(232,184,0,0.7);}
+  /* === String Lights & Photos === */
+  .photo-strings {
+    position: absolute;
+    top: 50px;
+    height: 80%;
+    width: 28%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    pointer-events: none; /* Prevents blocking clicks on the rest of the page */
+    z-index: 1;
+  }
+  .left-side { left: 2%; }
+  .right-side { right: 2%; }
+
+  .string-row {
+    position: relative;
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
+  }
+  
+  /* The swooping wire */
+  .string-wire {
+    position: absolute;
+    top: -15px; 
+    left: -10%;
+    width: 120%;
+    height: 50px;
+    border-bottom: 1.5px solid rgba(255, 255, 255, 0.15);
+    border-radius: 50%;
+    z-index: 0;
+    transition: border-color 2.5s ease;
+  }
+
+  .photo-item {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transform: translateY(var(--mt)) rotate(var(--rot));
+    /* Initial Dim State */
+    filter: brightness(0.1) grayscale(0.6);
+    opacity: 0; 
+    transition: all 2.5s ease;
+  }
+
+  /* The little clothespin/lightbulb */
+  .light-clip {
+    width: 14px;
+    height: 20px;
+    background: #333;
+    border-radius: 4px;
+    margin-bottom: -8px;
+    z-index: 2;
+    transition: all 2.5s ease;
+  }
+
+  /* Polaroid Look */
+  .photo-item img {
+    width: clamp(70px, 9vw, 130px);
+    aspect-ratio: 3/4;
+    object-fit: cover;
+    border: 5px solid #fff;
+    border-bottom-width: 20px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.6);
+    background: #111; /* fallback if image doesn't load immediately */
+  }
+
+  /* === ACTIVE STATE (TRIGGERED BY CLICK) === */
+  .lights-on .photo-item {
+    filter: brightness(1) grayscale(0);
+    opacity: 1;
+  }
+  .lights-on .light-clip {
+    background: #fff5e6;
+    box-shadow: 0 0 15px 6px rgba(255, 210, 80, 0.8), 
+                0 0 35px 15px rgba(255, 160, 20, 0.4);
+  }
+  .lights-on .string-wire {
+    border-bottom-color: rgba(255, 210, 80, 0.4);
+  }
+
+  /* Mobile scaling so it doesn't crowd the poem */
+  @media (max-width: 768px) {
+    .photo-strings { width: 35%; }
+    .photo-item img { border-width: 3px; border-bottom-width: 12px; }
+    .light-clip { width: 10px; height: 14px; margin-bottom: -5px; }
+  }
+</style>
+
+<div class="universe" id="universe">
+  <audio id="background-music" loop>
+    <source src="beanie.mp3" type="audio/mpeg">
+  </audio>
+  <canvas id="space"></canvas>
+  <div class="photo-strings left-side">
+      <div class="string-row">
+        <div class="string-wire"></div>
+        <div class="photo-item" style="--rot:-6deg; --mt: 5px;">
+          <div class="light-clip"></div>
+          <img src="1.jpg" alt="Us">
+        </div>
+        <div class="photo-item" style="--rot:4deg; --mt: 25px;">
+          <div class="light-clip"></div>
+          <img src="2.jpg" alt="Us">
+        </div>
+      </div>
+      
+      <div class="string-row">
+        <div class="string-wire"></div>
+        <div class="photo-item" style="--rot:2deg; --mt: 18px;">
+          <div class="light-clip"></div>
+          <img src="3.jpg" alt="Us">
+        </div>
+        <div class="photo-item" style="--rot:-4deg; --mt: 8px;">
+          <div class="light-clip"></div>
+          <img src="4.jpg" alt="Us">
+        </div>
+      </div>
+
+      <div class="string-row">
+        <div class="string-wire"></div>
+        <div class="photo-item" style="--rot:3deg; --mt: 15px;">
+          <div class="light-clip"></div>
+          <img src="5.jpg" alt="Us">
+        </div>
+        <div class="photo-item" style="--rot:-5deg; --mt: 5px;">
+          <div class="light-clip"></div>
+          <img src="6.jpg" alt="Us">
+        </div>
+      </div>
+    </div>
+
+    <div class="photo-strings right-side">
+      <div class="string-row">
+        <div class="string-wire"></div>
+        <div class="photo-item" style="--rot:5deg; --mt: 20px;">
+          <div class="light-clip"></div>
+          <img src="7.jpg" alt="Us">
+        </div>
+        <div class="photo-item" style="--rot:-3deg; --mt: 0px;">
+          <div class="light-clip"></div>
+          <img src="8.jpg" alt="Us">
+        </div>
+      </div>
+
+      <div class="string-row">
+        <div class="string-wire"></div>
+        <div class="photo-item" style="--rot:-6deg; --mt: 12px;">
+          <div class="light-clip"></div>
+          <img src="9.jpg" alt="Us">
+        </div>
+        <div class="photo-item" style="--rot:4deg; --mt: 22px;">
+          <div class="light-clip"></div>
+          <img src="10.jpg" alt="Us">
+        </div>
+      </div>
+
+      <div class="string-row">
+        <div class="string-wire"></div>
+        <div class="photo-item" style="--rot:-4deg; --mt: 10px;">
+          <div class="light-clip"></div>
+          <img src="11.jpg" alt="Us">
+        </div>
+        <div class="photo-item" style="--rot:6deg; --mt: 25px;">
+          <div class="light-clip"></div>
+          <img src="12.jpg" alt="Us">
+        </div>
+      </div>
+    </div>
+  <div class="content">
+    <div class="main-title">For My Beanie <br><span style="font-size: 12px; letter-spacing: 2px; opacity: 0.7;">(Click anywhere)</span></div>
+    <div class="heart-scene" id="heartScene">
+      <div class="heart-glow"></div>
+      <div class="heart-wrap">
+        <svg class="heart-svg" width="155" height="155" viewBox="0 0 160 160" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <radialGradient id="hgM" cx="38%" cy="32%" r="65%">
+              <stop offset="0%" stop-color="#ff3355" stop-opacity="0.97"/>
+              <stop offset="48%" stop-color="#cc0030"/>
+              <stop offset="100%" stop-color="#580012"/>
+            </radialGradient>
+            <radialGradient id="hgS" cx="32%" cy="26%" r="36%">
+              <stop offset="0%" stop-color="#ffffff" stop-opacity="0.18"/>
+              <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+            </radialGradient>
+          </defs>
+          <path d="M80 128 C22 90,10 52,30 32 C44 16,64 20,80 40 C96 20,116 16,130 32 C150 52,138 90,80 128Z" fill="url(#hgM)"/>
+          <path d="M80 128 C22 90,10 52,30 32 C44 16,64 20,80 40 C96 20,116 16,130 32 C150 52,138 90,80 128Z" fill="url(#hgS)"/>
+          <path d="M80 128 C22 90,10 52,30 32 C44 16,64 20,80 40 C96 20,116 16,130 32 C150 52,138 90,80 128Z" fill="none" stroke="rgba(255,70,100,0.4)" stroke-width="1"/>
+        </svg>
+      </div>
+      <canvas id="benaCanvas"></canvas>
+    </div>
+
+    <div class="angel-text">a beautiful angel that came down to earth</div>
+    <div class="birthday-text">April 27th, 2008</div>
+
+    <div class="divider-wrap">
+      <div class="divider-line"></div><div class="divider-diamond"></div><div class="divider-line"></div>
+    </div>
+    <div class="poem-wrap">
+      <div class="poem-title">Till Death Do Us Part</div>
+      <div class="poem-lines">
+        I carry your heart with me,<br>
+        <span class="gold">I carry it in my heart.</span><br>
+        I am never without it;<br>
+        anywhere I go, you go,<br>
+        <span class="gold">my darling, and whatever is done</span><br>
+        by only me, is your doing.<br><br>
+        I fear no fate, for you are my fate.<br>
+        <span class="gold">I want no world, for beautiful you are my world.</span><br>
+        And it's you are whatever a moon has always meant,<br>
+        and whatever a sun will always sing —<br>
+        <span class="gold">here is the deepest secret nobody knows.</span><br><br>
+        Here is the root of the root,<br>
+        the bud of the bud,<br>
+        <span class="gold">and the sky of the sky of a tree called life,</span><br>
+        which grows higher than the soul can hope<br>
+        or mind can hide.<br>
+        And it is the wonder that's keeping the stars apart —<br>
+        <span class="gold">I carry your heart. I carry it in my heart.</span>
+      </div>
+      <div class="divider-wrap" style="margin:0 auto;">
+        <div class="divider-line"></div><div class="divider-diamond"></div><div class="divider-line"></div>
+      </div>
+      <div class="byline">Made by <span>Adi</span> for his <span>Beanie</span></div>
+    </div>
+    <div class="ornament">
+      <div class="orb"></div><div class="orb"></div><div class="orb big"></div><div class="orb"></div><div class="orb"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const spaceCanvas = document.getElementById('space');
+const sCtx = spaceCanvas.getContext('2d');
+const uni = document.getElementById('universe');
+
+function resizeSpace(){
+  spaceCanvas.width = uni.offsetWidth;
+  spaceCanvas.height = Math.max(uni.offsetHeight, uni.scrollHeight);
+}
+resizeSpace();
+window.addEventListener('resize', resizeSpace);
+
+const stars = [];
+for(let i=0;i<220;i++){
+  stars.push({
+    x:Math.random()*(spaceCanvas.width||800),
+    y:Math.random()*3000,
+    r:Math.random()*1.8+0.3,
+    base:Math.random()*0.75+0.12,
+    phase:Math.random()*Math.PI*2,
+    speed:Math.random()*0.009+0.003,
+    drift:Math.random()*0.03-0.015,
+    vy:Math.random()*0.04-0.02
+  });
+}
+const shooters=[];
+function spawnShooter(){
+  const w=spaceCanvas.width||800;
+  shooters.push({x:Math.random()*w*0.65,y:Math.random()*80+10,len:Math.random()*90+50,spd:Math.random()*9+5,alpha:1,ang:Math.PI/5});
+}
+setInterval(spawnShooter,4200);
+setTimeout(spawnShooter,1000);
+
+function drawSpace(){
+  const w=uni.offsetWidth;
+  const h=Math.max(uni.offsetHeight,uni.scrollHeight);
+  if(spaceCanvas.width!==w||spaceCanvas.height!==h){spaceCanvas.width=w;spaceCanvas.height=h;}
+  sCtx.clearRect(0,0,w,h);
+  for(const s of stars){
+    s.phase+=s.speed;s.x+=s.drift;s.y+=s.vy;
+    if(s.x<0)s.x=w;if(s.x>w)s.x=0;
+    if(s.y<0)s.y=h;if(s.y>h)s.y=0;
+    const a=s.base*(0.3+0.7*Math.abs(Math.sin(s.phase)));
+    sCtx.beginPath();sCtx.arc(s.x%w,s.y%h,s.r,0,Math.PI*2);
+    sCtx.fillStyle=`rgba(255,255,255,${a.toFixed(2)})`;sCtx.fill();
+  }
+  for(let i=shooters.length-1;i>=0;i--){
+    const sh=shooters[i];
+    sCtx.save();sCtx.globalAlpha=sh.alpha*0.7;
+    sCtx.strokeStyle='rgba(255,255,255,0.9)';sCtx.lineWidth=1.5;
+    sCtx.beginPath();sCtx.moveTo(sh.x,sh.y);
+    sCtx.lineTo(sh.x-Math.cos(sh.ang)*sh.len,sh.y-Math.sin(sh.ang)*sh.len);
+    sCtx.stroke();sCtx.restore();
+    sh.x+=Math.cos(sh.ang)*sh.spd;sh.y+=Math.sin(sh.ang)*sh.spd;
+    sh.alpha-=0.015;if(sh.alpha<=0)shooters.splice(i,1);
+  }
+  requestAnimationFrame(drawSpace);
+}
+requestAnimationFrame(drawSpace);
+
+const benaCanvas = document.getElementById('benaCanvas');
+const bCtx = benaCanvas.getContext('2d');
+
+function resizeBena(){
+  const hs=document.getElementById('heartScene');
+  benaCanvas.width=hs.offsetWidth;
+  benaCanvas.height=hs.offsetHeight;
+}
+resizeBena();
+window.addEventListener('resize',resizeBena);
+
+// The orbit travels left-to-right across the front.
+// Front pass = left side of ellipse coming around to right side (cosA goes from -1 to +1 at front).
+// We want the reading order left-to-right on the FRONT pass to be: B  E  N  A
+// The orbit angle increases over time. At the front (bottom of ellipse in sinA terms),
+// sinA = +1 means fully front. The letter that is most to the LEFT on the front pass
+// has a smaller angle offset. 
+// cosA = cos(angle): left = cosA negative, right = cosA positive.
+// So for left-to-right order B E N A on front, B should have most negative cosA (leftmost)
+// meaning B has the smallest angle offset among the four when they're on the front arc.
+// We space them 0.30 rad apart.
+// Letter order by increasing angle offset: B(0), E(0.30), N(0.60), A(0.90)
+// This means when sweeping left-to-right (cosA: -1 → +1), B appears first (leftmost), then E, N, A.
+
+const LETTERS = ['B', 'E', 'N', 'A'];
+const SPACING = 0.30;
+// B gets offset 0, E gets 0.30, N gets 0.60, A gets 0.90
+const OFFSETS = [0, SPACING, SPACING*2, SPACING*3];
+
+const CYCLE = 7000;
+let orbitStart = null;
+
+function drawLetters(ts){
+  if(!orbitStart) orbitStart = ts;
+  const elapsed = (ts - orbitStart) % CYCLE;
+  const t = elapsed / CYCLE;
+
+  bCtx.clearRect(0,0,benaCanvas.width,benaCanvas.height);
+
+  const cx = benaCanvas.width / 2;
+  const cy = benaCanvas.height / 2;
+  const RX = benaCanvas.width * 0.46;
+  const RY = 34;
+
+  const letterData = [];
+
+  for(let i = 0; i < 4; i++){
+    // Base angle sweeps full circle. Start at top (-PI/2) and go clockwise.
+    const baseAngle = t * Math.PI * 2 - Math.PI / 2;
+    const angle = baseAngle - OFFSETS[i];
+
+    const cosA = Math.cos(angle);
+    const sinA = Math.sin(angle);
+
+    const x = cx + RX * cosA;
+    const y = cy + RY * sinA;
+
+    const isBehind = sinA < 0;
+
+    // distFromFront: 0=fully behind, 1=fully front
+    const distFromFront = (sinA + 1) / 2;
+
+    const perspScale = 0.40 + 0.64 * distFromFront;
+    const fontSize = Math.round(11 + 30 * distFromFront);
+
+    // Fade near edges of ellipse horizontally so letters appear/disappear smoothly
+    const edgeFade = Math.max(0, 1 - Math.pow(Math.abs(cosA) * 0.88, 5));
+
+    let opacity;
+    if(isBehind){
+      opacity = 0.14 * (1 - Math.abs(cosA) * 0.4);
+    } else {
+      opacity = (0.32 + 0.68 * distFromFront) * edgeFade;
+    }
+
+    letterData.push({
+      letter: LETTERS[i],
+      x, y,
+      isBehind,
+      perspScale,
+      fontSize,
+      opacity: Math.max(0, Math.min(1, opacity)),
+      sinA
+    });
+  }
+
+  // Paint behind letters first, front letters on top
+  letterData.sort((a, b) => a.sinA - b.sinA);
+
+  for(const d of letterData){
+    if(d.opacity < 0.03) continue;
+    bCtx.save();
+    bCtx.globalAlpha = d.opacity;
+    bCtx.font = `700 ${d.fontSize}px 'Cinzel Decorative',serif`;
+    bCtx.textBaseline = 'middle';
+    bCtx.textAlign = 'center';
+    bCtx.translate(d.x, d.y);
+    bCtx.scale(d.perspScale, d.perspScale);
+    if(!d.isBehind){
+      bCtx.shadowColor = 'rgba(232,184,0,1)';
+      bCtx.shadowBlur = 24;
+      bCtx.fillStyle = '#e8b800';
+    } else {
+      bCtx.fillStyle = 'rgba(150,100,0,0.55)';
+    }
+    bCtx.fillText(d.letter, 0, 0);
+    bCtx.restore();
+  }
+
+  requestAnimationFrame(drawLetters);
+}
+requestAnimationFrame(drawLetters);
+// Play music and turn on lights on the first click
+document.body.addEventListener('click', function() {
+  const bgMusic = document.getElementById('background-music');
+  if (bgMusic && bgMusic.paused) {
+    bgMusic.play();
+  }
+  // This triggers the CSS dim-to-bright and photo reveal animations
+  document.getElementById('universe').classList.add('lights-on');
+}, { once: true });
+</script>
